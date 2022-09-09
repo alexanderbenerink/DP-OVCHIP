@@ -1,7 +1,10 @@
 package nl.hu.dp;
 
+import nl.hu.dp.ovchip.data.AdresDAO;
+import nl.hu.dp.ovchip.data.AdresDAOPsql;
 import nl.hu.dp.ovchip.data.ReizigerDAO;
 import nl.hu.dp.ovchip.data.ReizigerDAOPsql;
+import nl.hu.dp.ovchip.domain.Adres;
 import nl.hu.dp.ovchip.domain.Reiziger;
 
 import java.sql.*;
@@ -12,7 +15,11 @@ public class OvchipApplication {
 
     public static void main(String[] args) throws SQLException {
         ReizigerDAOPsql rdao = new ReizigerDAOPsql(getConnection());
-        testReizigerDAO(rdao);
+        AdresDAOPsql adao = new AdresDAOPsql(getConnection());
+
+//        testReizigerDAO(rdao);
+        testAdresDAO(adao, rdao);
+
         closeConnection();
     }
 
@@ -83,5 +90,59 @@ public class OvchipApplication {
             System.out.println("Gebruikers zijn verwijderd");
         }
         System.out.println();
+    }
+
+    /**
+     * P3. Adres DAO: persistentie van een klasse
+     *
+     * Deze methode test de CRUD-functionaliteit van de Adres DAO
+     *
+     * @throws SQLException
+     */
+    private static void testAdresDAO(AdresDAO adao, ReizigerDAO rdao) throws SQLException {
+        System.out.println("\n---------- Test AdresDAO -------------");
+
+        // findAll(): Zoek alle addressen op
+        List<Adres> adressen = adao.findAll();
+        System.out.println("[Test] AdresDAO.findAll() geeft de volgende addressen:");
+        for (Adres a : adressen) {
+            // // Reiziger hier is null omdat ik geen reiziger mee kan geven in AdresDAOPsql aan de Adres constructor..
+            // // Dus is het voor nu gecomment.
+
+//            Adres adres = adao.findById(a.getId());
+//            Reiziger reiziger = adres.getReiziger();
+//            System.out.println("Reiziger {" + reiziger + ", Adres {" + a + "}}");
+            System.out.println(a);
+        }
+        System.out.println();
+
+        // save(): Save adres
+        String gbdatum = "1981-03-14";
+//        Reiziger willem = new Reiziger(76, "W", "", "Boers", java.sql.Date.valueOf(gbdatum));
+        Reiziger willem = rdao.findByGbdatum(gbdatum).get(0);
+        Adres adres = new Adres(6, "1234AB", "56", "Stationsplein", "Schiedam", willem);
+        willem.setAdres(adres);
+        System.out.print("[Test] Eerst " + adressen.size() + " adressen, na AdresDAO.save() ");
+//        rdao.save(willem);
+        adao.save(adres);
+        adressen = adao.findAll();
+        System.out.println(adressen.size() + " adressen\n");
+
+        // update(): Update adres
+        System.out.print("[Test] Eerst is het huisnummer van Willem: " + willem.getAdres().getHuisnummer());
+        adres.setHuisnummer("50");
+        adao.update(adres);
+        System.out.print(", na AdresDAO.update() is het huisnummer: " + willem.getAdres().getHuisnummer() + "\n\n");
+
+        // delete(): Delete adres
+        Reiziger reiziger = rdao.findByGbdatum(gbdatum).get(0);
+        System.out.print("[Test] Eerst is Willems adres: " + willem.getAdres().getPostcode() + " " + willem.getAdres().getWoonplaats());
+        adao.delete(adres);
+        reiziger = rdao.findByGbdatum(gbdatum).get(0);
+        System.out.print(", maar na AdresDAO.delete() is het: " + reiziger.getAdres() + "\n\n");
+
+        // findByReiziger(): Zoek adres op reiziger
+        Reiziger reiziger2 = rdao.findById(1);
+        System.out.print("[Test] Het adres van: " + reiziger2.getNaam() + ", is na AdresDAO.findByReiziger(): " + adao.findByReiziger(reiziger2).getStraat() + " " + adao.findByReiziger(reiziger2).getHuisnummer());
     }
 }
