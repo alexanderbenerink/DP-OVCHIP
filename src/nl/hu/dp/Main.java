@@ -1,24 +1,24 @@
 package nl.hu.dp;
 
-import nl.hu.dp.ovchip.data.AdresDAO;
-import nl.hu.dp.ovchip.data.AdresDAOPsql;
-import nl.hu.dp.ovchip.data.ReizigerDAO;
-import nl.hu.dp.ovchip.data.ReizigerDAOPsql;
+import nl.hu.dp.ovchip.data.*;
 import nl.hu.dp.ovchip.domain.Adres;
+import nl.hu.dp.ovchip.domain.OVChipkaart;
 import nl.hu.dp.ovchip.domain.Reiziger;
 
 import java.sql.*;
 import java.util.List;
 
-public class OvchipApplication {
+public class Main {
     private static Connection connection;
 
     public static void main(String[] args) throws SQLException {
         ReizigerDAOPsql rdao = new ReizigerDAOPsql(getConnection());
         AdresDAOPsql adao = new AdresDAOPsql(getConnection());
+        OVChipkaartDAOPsql odao = new OVChipkaartDAOPsql(getConnection());
 
 //        testReizigerDAO(rdao);
-        testAdresDAO(adao, rdao);
+//        testAdresDAO(adao, rdao);
+        testOVChipkaartDAO(odao, rdao);
 
         closeConnection();
     }
@@ -144,5 +144,47 @@ public class OvchipApplication {
         // findByReiziger(): Zoek adres op reiziger
         Reiziger reiziger2 = rdao.findById(1);
         System.out.print("[Test] Het adres van: " + reiziger2.getNaam() + ", is na AdresDAO.findByReiziger(): " + adao.findByReiziger(reiziger2).getStraat() + " " + adao.findByReiziger(reiziger2).getHuisnummer());
+    }
+
+    /**
+     * P4. OVChipkaart DAO: persistentie van een klasse
+     *
+     * Deze methode test de CRUD-functionaliteit van de OVChipkaart DAO
+     *
+     * @throws SQLException
+     */
+    private static void testOVChipkaartDAO(OVChipkaartDAO odao, ReizigerDAO rdao) throws SQLException {
+        System.out.println("\n---------- Test OVChipkaartDAO -------------\n");
+
+        // save(): Sla een nieuwe OVChipkaart op
+        Reiziger reiziger = new Reiziger(6, "J", "de", "Mol", Date.valueOf("1955-04-24"));
+        Adres adres = new Adres(6, "1234AB", "56", "Johannes Vermeerlaan", "Apeldoorn", rdao.findById(reiziger.getId()));
+        OVChipkaart ovchip = new OVChipkaart(12345, Date.valueOf("2022-10-14"), 1, 20, reiziger.getId());
+
+        reiziger.setAdres(adres);
+        reiziger.getOvchipkaarten().add(ovchip);
+
+        rdao.save(reiziger);
+        odao.save(ovchip);
+
+        System.out.println("Nieuwe ovchipkaart na save(): \n" + odao.findByReiziger(reiziger).get(0) + "\n");
+
+        // update(): Update een bestaand OVChipkaart
+        System.out.println("Gegevens op de kaart voor update(): \n" + odao.findByReiziger(reiziger).get(0) + "\n");
+        ovchip.setKlasse(2);
+        odao.update(ovchip);
+
+        System.out.println("Gegegevens op de kaart na update(): \n" + odao.findByReiziger(reiziger).get(0) + "\n");
+
+        // findByReiziger(): Zoek een bestaand OVChipkaart op basis van een reiziger
+        System.out.println("Zoek OV chipkaart op basis van: " + reiziger);
+        System.out.println(odao.findByReiziger(reiziger).get(0) + "\n");
+
+        // delete(): Verwijder een bestaand OVChipkaart
+        System.out.println("Voor delete(): \n" + odao.findByReiziger(reiziger).get(0) + "\n");
+        odao.delete(ovchip);
+        rdao.delete(reiziger);
+        System.out.println("Na delete(): \n" + odao.findByReiziger(reiziger) + "\n");
+
     }
 }

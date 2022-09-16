@@ -1,6 +1,8 @@
 package nl.hu.dp.ovchip.domain;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Reiziger {
     private int id;
@@ -9,6 +11,7 @@ public class Reiziger {
     private String achternaam;
     private Date geboortedatum;
     private Adres adres;
+    private List<OVChipkaart> ovchipkaarten = new ArrayList<>();
 
     public Reiziger(int id, String vl, String tv, String an, Date gb) {
         this.id = id;
@@ -59,9 +62,16 @@ public class Reiziger {
         this.adres = adres;
     }
 
+    public List<OVChipkaart> getOvchipkaarten() {
+        return ovchipkaarten;
+    }
+
+    public void setOvchipkaarten(List<OVChipkaart> ovchipkaarten) {
+        this.ovchipkaarten = ovchipkaarten;
+    }
+
     @Override
     public String toString() {
         return "#" + this.id + " " + getNaam() + ", geb." + this.geboortedatum + " ";
     }
-
 }

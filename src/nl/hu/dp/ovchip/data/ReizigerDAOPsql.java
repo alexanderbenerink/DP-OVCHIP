@@ -1,6 +1,7 @@
 package nl.hu.dp.ovchip.data;
 
 import nl.hu.dp.ovchip.data.ReizigerDAO;
+import nl.hu.dp.ovchip.domain.OVChipkaart;
 import nl.hu.dp.ovchip.domain.Reiziger;
 
 import java.sql.*;
@@ -8,12 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReizigerDAOPsql implements ReizigerDAO {
-    private Connection conn;
+    private final Connection conn;
+    private final OVChipkaartDAOPsql odao;
 
     public ReizigerDAOPsql(Connection conn) {
         this.conn = conn;
+        this.odao = new OVChipkaartDAOPsql(conn);
     }
 
+    @Override
     public boolean save(Reiziger reiziger) {
         try {
             // save traveler using a prepareStatement
@@ -30,19 +34,26 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             rs.close();
             pst.close();
 
+            // save travelers ovchip card(s)
+            for (OVChipkaart ovchip : reiziger.getOvchipkaarten()) {
+                odao.save(ovchip);
+            }
+
             return true;
         }
         catch (SQLException sqlex) {
             String emptyResults = "No results were returned by the query.";
 
             if (!sqlex.getMessage().equals(emptyResults)) {
-                System.err.println("An error occurred while saving traveler: " + sqlex.getMessage());
+                System.err.println("An error occurred while saving traveler: ");
+                sqlex.printStackTrace();
             }
         }
 
         return false;
     }
 
+    @Override
     public boolean update(Reiziger reiziger) {
         try {
             // find traveler by id and update using a prepareStatement
@@ -60,20 +71,34 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             rs.close();
             pst.close();
 
+            // update travelers ovchip card(s)
+            for (OVChipkaart ovchip : reiziger.getOvchipkaarten()) {
+                odao.update(ovchip);
+            }
+
             return true;
         }
         catch (SQLException sqlex) {
             String emptyResults = "No results were returned by the query.";
 
             if (!sqlex.getMessage().equals(emptyResults)) {
-                System.err.println("An error occurred while trying to update traveler: " + sqlex.getMessage());
+                System.err.println("An error occurred while trying to update traveler: ");
+                sqlex.printStackTrace();
             }
         }
         return false;
     }
 
+    @Override
     public boolean delete(Reiziger reiziger) {
         try {
+            // delete travelers ovchip card(s) before deleting traveler
+            // otherwise you'll get an sql error telling you that traveler
+            // still has references in the ov_chipkaart table
+            for (OVChipkaart ovchip : reiziger.getOvchipkaarten()) {
+                odao.delete(ovchip);
+            }
+
             // find traveler by id and delete them using a prepareStatement
             String q = "DELETE FROM reiziger WHERE reiziger_id = ?;";
             PreparedStatement pst = conn.prepareStatement(q);
@@ -90,12 +115,14 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             String emptyResults = "No results were returned by the query.";
 
             if (!sqlex.getMessage().equals(emptyResults)) {
-                System.err.println("An error occurred while trying to delete traveler: " + sqlex.getMessage());
+                System.err.println("An error occurred while trying to delete traveler: ");
+                sqlex.printStackTrace();
             }
         }
         return false;
     }
 
+    @Override
     public Reiziger findById(int id) {
         try {
             // find traveler by id using a prepareStatement
@@ -125,11 +152,13 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             return reiziger;
         }
         catch (SQLException sqlex) {
-            System.err.println("An error occurred while searching by id: " + sqlex.getMessage());
+            System.err.println("An error occurred while searching by id: ");
+            sqlex.printStackTrace();
         }
         return null;
     }
 
+    @Override
     public List<Reiziger> findByGbdatum(String datum) {
         try {
             // find traveler by id using a prepareStatement
@@ -159,11 +188,13 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             return reizigers;
         }
         catch (SQLException sqlex) {
-            System.err.println("An error occurred while searching by birthdate: " + sqlex.getMessage());
+            System.err.println("An error occurred while searching by birthdate: ");
+            sqlex.printStackTrace();
         }
         return null;
     }
 
+    @Override
     public List<Reiziger> findAll() {
         try {
             // use a prepareStatements to query all travelers
@@ -193,7 +224,8 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             return reizigers;
         }
         catch (SQLException sqlex) {
-            System.err.println("Travelers couldn't be fetched: " + sqlex.getMessage());
+            System.err.println("Travelers couldn't be fetched: ");
+            sqlex.printStackTrace();
         }
         return null;
     }
