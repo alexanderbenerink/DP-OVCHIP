@@ -160,6 +160,7 @@ public class ReizigerDAOPsql implements ReizigerDAO {
 
     @Override
     public List<Reiziger> findByGbdatum(String datum) {
+        List<Reiziger> reizigers = new ArrayList<>();
         try {
             // find traveler by id using a prepareStatement
             String q = "SELECT * FROM reiziger WHERE geboortedatum = ?;";
@@ -167,7 +168,6 @@ public class ReizigerDAOPsql implements ReizigerDAO {
             pst.setDate(1, Date.valueOf(datum));
             ResultSet rs = pst.executeQuery();
 
-            List<Reiziger> reizigers = new ArrayList<>();
 
             // add the traveler(s) to a list
             while (rs.next())
@@ -196,13 +196,13 @@ public class ReizigerDAOPsql implements ReizigerDAO {
 
     @Override
     public List<Reiziger> findAll() {
+        List<Reiziger> reizigers = new ArrayList<>();
         try {
             // use a prepareStatements to query all travelers
             String q = "SELECT * FROM reiziger";
             PreparedStatement pst = conn.prepareStatement(q);
             ResultSet rs = pst.executeQuery();
 
-            List<Reiziger> reizigers = new ArrayList<>();
 
             // add the traveler(s) to a list
             while (rs.next())

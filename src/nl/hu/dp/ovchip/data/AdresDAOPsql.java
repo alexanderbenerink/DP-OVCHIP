@@ -37,7 +37,8 @@ public class AdresDAOPsql implements AdresDAO {
             String emptyResults = "No results were returned by the query.";
 
             if (!sqlex.getMessage().equals(emptyResults)) {
-                System.err.println("An error occurred while saving traveler: " + sqlex.getMessage());
+                System.err.println("An error occurred while saving traveler: ");
+                sqlex.printStackTrace();
             }
         }
 
@@ -68,7 +69,8 @@ public class AdresDAOPsql implements AdresDAO {
             String emptyResults = "No results were returned by the query.";
 
             if (!sqlex.getMessage().equals(emptyResults)) {
-                System.err.println("An error occurred while trying to update address: " + sqlex.getMessage());
+                System.err.println("An error occurred while trying to update address: ");
+                sqlex.printStackTrace();
             }
         }
         return false;
@@ -92,7 +94,8 @@ public class AdresDAOPsql implements AdresDAO {
             String emptyResults = "No results were returned by the query.";
 
             if (!sqlex.getMessage().equals(emptyResults)) {
-                System.err.println("An error occurred while trying to delete address: " + sqlex.getMessage());
+                System.err.println("An error occurred while trying to delete address: ");
+                sqlex.printStackTrace();
             }
         }
         return false;
@@ -128,7 +131,8 @@ public class AdresDAOPsql implements AdresDAO {
             return adres;
         }
         catch (SQLException sqlex) {
-            System.err.println("An error occurred while searching by id: " + sqlex.getMessage());
+            System.err.println("An error occurred while searching by id: ");
+            sqlex.printStackTrace();
         }
         return null;
     }
@@ -163,7 +167,8 @@ public class AdresDAOPsql implements AdresDAO {
             return adres;
         }
         catch (SQLException sqlex) {
-            System.err.println("An error occurred while searching by id: " + sqlex.getMessage());
+            System.err.println("An error occurred while searching by id: ");
+            sqlex.printStackTrace();
         }
         return null;
     }
@@ -198,7 +203,8 @@ public class AdresDAOPsql implements AdresDAO {
             return adressen;
         }
         catch (SQLException sqlex) {
-            System.err.println("Adresses couldn't be fetched: " + sqlex.getMessage());
+            System.err.println("Adresses couldn't be fetched: ");
+            sqlex.printStackTrace();
         }
         return null;
     }

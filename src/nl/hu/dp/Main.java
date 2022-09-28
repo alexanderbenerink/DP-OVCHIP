@@ -16,8 +16,8 @@ public class Main {
         AdresDAOPsql adao = new AdresDAOPsql(getConnection());
         OVChipkaartDAOPsql odao = new OVChipkaartDAOPsql(getConnection());
 
-//        testReizigerDAO(rdao);
-//        testAdresDAO(adao, rdao);
+        testReizigerDAO(rdao);
+        testAdresDAO(adao, rdao);
         testOVChipkaartDAO(odao, rdao);
 
         closeConnection();
@@ -48,7 +48,7 @@ public class Main {
      * @throws SQLException
      */
     private static void testReizigerDAO(ReizigerDAO rdao) throws SQLException {
-        System.out.println("\n---------- Test ReizigerDAO -------------");
+        System.out.println("\n---------- (P2) Test ReizigerDAO -------------");
 
         // Haal alle reizigers op uit de database
         List<Reiziger> reizigers = rdao.findAll();
@@ -100,30 +100,24 @@ public class Main {
      * @throws SQLException
      */
     private static void testAdresDAO(AdresDAO adao, ReizigerDAO rdao) throws SQLException {
-        System.out.println("\n---------- Test AdresDAO -------------");
+        System.out.println("\n---------- (P3) Test AdresDAO -------------");
 
         // findAll(): Zoek alle addressen op
         List<Adres> adressen = adao.findAll();
         System.out.println("[Test] AdresDAO.findAll() geeft de volgende addressen:");
         for (Adres a : adressen) {
-            // // Reiziger hier is null omdat ik geen reiziger mee kan geven in AdresDAOPsql aan de Adres constructor..
-            // // Dus is het voor nu gecomment.
-
-//            Adres adres = adao.findById(a.getId());
-//            Reiziger reiziger = adres.getReiziger();
-//            System.out.println("Reiziger {" + reiziger + ", Adres {" + a + "}}");
             System.out.println(a);
         }
         System.out.println();
 
         // save(): Save adres
         String gbdatum = "1981-03-14";
-//        Reiziger willem = new Reiziger(76, "W", "", "Boers", java.sql.Date.valueOf(gbdatum));
-        Reiziger willem = rdao.findByGbdatum(gbdatum).get(0);
+        Reiziger willem = new Reiziger(76, "W", "", "Boers", java.sql.Date.valueOf(gbdatum));
+//        Reiziger willem = rdao.findByGbdatum(gbdatum).get(0);
         Adres adres = new Adres(6, "1234AB", "56", "Stationsplein", "Schiedam", willem);
         willem.setAdres(adres);
         System.out.print("[Test] Eerst " + adressen.size() + " adressen, na AdresDAO.save() ");
-//        rdao.save(willem);
+        rdao.save(willem);
         adao.save(adres);
         adressen = adao.findAll();
         System.out.println(adressen.size() + " adressen\n");
@@ -138,12 +132,12 @@ public class Main {
         Reiziger reiziger = rdao.findByGbdatum(gbdatum).get(0);
         System.out.print("[Test] Eerst is Willems adres: " + willem.getAdres().getPostcode() + " " + willem.getAdres().getWoonplaats());
         adao.delete(adres);
-        reiziger = rdao.findByGbdatum(gbdatum).get(0);
-        System.out.print(", maar na AdresDAO.delete() is het: " + reiziger.getAdres() + "\n\n");
+        rdao.delete(willem);
+        System.out.print(", maar na AdresDAO.delete() is het: " + rdao.findByGbdatum(gbdatum) + "\n\n");
 
         // findByReiziger(): Zoek adres op reiziger
         Reiziger reiziger2 = rdao.findById(1);
-        System.out.print("[Test] Het adres van: " + reiziger2.getNaam() + ", is na AdresDAO.findByReiziger(): " + adao.findByReiziger(reiziger2).getStraat() + " " + adao.findByReiziger(reiziger2).getHuisnummer());
+        System.out.print("[Test] Het adres van: " + reiziger2.getNaam() + ", is na AdresDAO.findByReiziger(): " + adao.findByReiziger(reiziger2).getStraat() + " " + adao.findByReiziger(reiziger2).getHuisnummer() + "\n");
     }
 
     /**
@@ -154,7 +148,7 @@ public class Main {
      * @throws SQLException
      */
     private static void testOVChipkaartDAO(OVChipkaartDAO odao, ReizigerDAO rdao) throws SQLException {
-        System.out.println("\n---------- Test OVChipkaartDAO -------------\n");
+        System.out.println("\n---------- (P4) Test OVChipkaartDAO -------------\n");
 
         // save(): Sla een nieuwe OVChipkaart op
         Reiziger reiziger = new Reiziger(6, "J", "de", "Mol", Date.valueOf("1955-04-24"));
