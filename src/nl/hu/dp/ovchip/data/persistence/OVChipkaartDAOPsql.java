@@ -1,18 +1,25 @@
-package nl.hu.dp.ovchip.data;
+package nl.hu.dp.ovchip.data.persistence;
 
+import nl.hu.dp.ovchip.data.OVChipkaartDAO;
 import nl.hu.dp.ovchip.domain.OVChipkaart;
+import nl.hu.dp.ovchip.domain.Product;
 import nl.hu.dp.ovchip.domain.Reiziger;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class OVChipkaartDAOPsql implements OVChipkaartDAO {
     private final Connection conn;
+    private ProductDAOPsql pdao;
 
     public OVChipkaartDAOPsql(Connection conn) {
         this.conn = conn;
+//        this.pdao = new ProductDAOPsql(conn);
+    }
+
+    public void setPdao(ProductDAOPsql pdao) {
+        this.pdao = pdao;
     }
 
     @Override
@@ -48,6 +55,13 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
 
             pst.execute();
             pst.close();
+
+            for (Product product : pdao.findByOVChipkaart(ovChipkaart)) {
+                if (ovChipkaart.getProduct().contains(product)) {
+                    pdao.update(product);
+                }
+            }
+
             return true;
         }
         catch (SQLException sqlex) {
@@ -66,6 +80,13 @@ public class OVChipkaartDAOPsql implements OVChipkaartDAO {
 
             pst.execute();
             pst.close();
+
+            PreparedStatement pst1 = conn.prepareStatement("DELETE FROM ov_chipkaart_product WHERE kaart_nummer = ?");
+            pst1.setInt(1, ovChipkaart.getKaartNummer());
+
+            pst1.execute();
+            pst1.close();
+
             return true;
         }
         catch (SQLException sqlex) {

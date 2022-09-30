@@ -1,4 +1,4 @@
-package nl.hu.dp.ovchip.data;
+package nl.hu.dp.ovchip.data.persistence;
 
 import nl.hu.dp.ovchip.data.ReizigerDAO;
 import nl.hu.dp.ovchip.domain.OVChipkaart;

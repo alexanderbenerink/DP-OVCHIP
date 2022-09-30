@@ -1,5 +1,6 @@
-package nl.hu.dp.ovchip.data;
+package nl.hu.dp.ovchip.data.persistence;
 
+import nl.hu.dp.ovchip.data.AdresDAO;
 import nl.hu.dp.ovchip.domain.Adres;
 import nl.hu.dp.ovchip.domain.Reiziger;
 

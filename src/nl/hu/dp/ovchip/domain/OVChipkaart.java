@@ -1,6 +1,7 @@
 package nl.hu.dp.ovchip.domain;
 
 import java.sql.Date;
+import java.util.List;
 
 public class OVChipkaart {
     private int kaartNummer;
@@ -8,6 +9,7 @@ public class OVChipkaart {
     private int klasse;
     private double saldo;
     private int reizigerId;
+    private List<Product> product;
 
     public OVChipkaart(int kn, Date gt, int kl, double sl, int ri) {
         this.kaartNummer = kn;
@@ -15,6 +17,15 @@ public class OVChipkaart {
         this.klasse = kl;
         this.saldo = sl;
         this.reizigerId = ri;
+    }
+
+    public OVChipkaart(int kn, Date gt, int kl, double sl, int ri, List<Product> pr) {
+        this.kaartNummer = kn;
+        this.geldigTot = gt;
+        this.klasse = kl;
+        this.saldo = sl;
+        this.reizigerId = ri;
+        this.product = pr;
     }
 
     public int getKaartNummer() {
@@ -55,6 +66,14 @@ public class OVChipkaart {
 
     public void setReizigerId(int reizigerId) {
         this.reizigerId = reizigerId;
+    }
+
+    public List<Product> getProduct() {
+        return product;
+    }
+
+    public void setProduct(List<Product> product) {
+        this.product = product;
     }
 
     @Override

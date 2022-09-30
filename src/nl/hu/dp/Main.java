@@ -1,8 +1,13 @@
 package nl.hu.dp;
 
 import nl.hu.dp.ovchip.data.*;
+import nl.hu.dp.ovchip.data.persistence.AdresDAOPsql;
+import nl.hu.dp.ovchip.data.persistence.OVChipkaartDAOPsql;
+import nl.hu.dp.ovchip.data.persistence.ProductDAOPsql;
+import nl.hu.dp.ovchip.data.persistence.ReizigerDAOPsql;
 import nl.hu.dp.ovchip.domain.Adres;
 import nl.hu.dp.ovchip.domain.OVChipkaart;
+import nl.hu.dp.ovchip.domain.Product;
 import nl.hu.dp.ovchip.domain.Reiziger;
 
 import java.sql.*;
@@ -12,13 +17,17 @@ public class Main {
     private static Connection connection;
 
     public static void main(String[] args) throws SQLException {
+        ProductDAOPsql pdao = new ProductDAOPsql(getConnection());
         ReizigerDAOPsql rdao = new ReizigerDAOPsql(getConnection());
         AdresDAOPsql adao = new AdresDAOPsql(getConnection());
         OVChipkaartDAOPsql odao = new OVChipkaartDAOPsql(getConnection());
 
+        odao.setPdao(pdao);
+
         testReizigerDAO(rdao);
         testAdresDAO(adao, rdao);
         testOVChipkaartDAO(odao, rdao);
+        testProductDAO(pdao, odao, rdao);
 
         closeConnection();
     }
@@ -180,5 +189,49 @@ public class Main {
         rdao.delete(reiziger);
         System.out.println("Na delete(): \n" + odao.findByReiziger(reiziger) + "\n");
 
+    }
+
+    /**
+     * P5. Product DAO: persistentie van een klasse
+     *
+     * Deze methode test de CRUD-functionaliteit van de Product DAO
+     *
+     * @throws SQLException
+     */
+    private static void testProductDAO(ProductDAO pdao, OVChipkaartDAO odao, ReizigerDAO rdao) throws SQLException {
+        System.out.println("\n---------- (P5) Test ProductDAO -------------\n");
+
+        // save(): Sla een nieuw product op
+        Reiziger reiziger = new Reiziger(6, "J", "de", "Mol", Date.valueOf("1955-04-24"));
+        OVChipkaart ovchip = new OVChipkaart(12345, Date.valueOf("2022-10-14"), 1, 20, reiziger.getId());
+        Product product = new Product(7, "Test Product", "Testen persistentie veel-op-veel relaties", 0.0);
+
+        rdao.save(reiziger);
+        odao.save(ovchip);
+
+        product.getOvChipkaarten().add(ovchip);
+        reiziger.getOvchipkaarten().add(ovchip);
+
+        pdao.save(product);
+
+        System.out.println("Nieuw product na save(): \n" + pdao.findByOVChipkaart(ovchip) + "\n");
+
+        // update(): Update een bestaand product
+        System.out.println("Gegevens van het product voor update(): \n" + pdao.findByOVChipkaart(ovchip) + "\n");
+        product.setPrijs(1.0);
+        pdao.update(product);
+        System.out.println("Gegevens van het product na update(): \n" + pdao.findByOVChipkaart(ovchip) + "\n");
+
+        // findAll(): Vind alle producten
+        System.out.println("Alle producten d.m.v. findAll():");
+        pdao.findAll().forEach(System.out::println);
+
+        // delete(): Verwijder een bestaand product
+        System.out.println("\nHet product voor delete(): \n" + pdao.findByOVChipkaart(ovchip) + "\n");
+        pdao.delete(product);
+        System.out.println("Het product na delete(): \n" + pdao.findByOVChipkaart(ovchip) + "\n");
+
+        rdao.delete(reiziger);
+        odao.delete(ovchip);
     }
 }
